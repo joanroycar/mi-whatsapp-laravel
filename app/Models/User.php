@@ -59,7 +59,7 @@ class User extends Authenticatable
         'profile_photo_url',
     ];
 
-    public function contact(){
+    public function contacts(){
         return $this->hasMany(Contact::class);
     }
 
@@ -69,7 +69,6 @@ class User extends Authenticatable
     }
 
     //relacion muchos a muchos
-
     public function chats(){
         return $this->belongsToMany(Chat::class)->withPivot('color','active')->withTimestamps();
     }
