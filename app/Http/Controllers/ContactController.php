@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Contact;
 use App\Models\User;
+use App\Rules\InvalidEmail;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 
@@ -39,6 +40,7 @@ class ContactController extends Controller
                 'email',
                 'exists:users',
                 Rule::notIn([auth()->user()->email]),
+                new InvalidEmail
                 
             ]
         ]);
@@ -78,7 +80,28 @@ class ContactController extends Controller
      */
     public function update(Request $request, Contact $contact)
     {
-        //
+        $request->validate([
+            'name' => 'required',
+            'email' => [
+                'required',
+                'email',
+                'exists:users',
+                Rule::notIn([auth()->user()->email]),
+                new InvalidEmail($contact->user->email)
+            ]
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        $contact->update([
+            'name' => $request->name,
+            'contact_id' => $user->id,
+        ]);
+
+        session()->flash('flash.banner', 'El contacto se actualizó correctamente');
+        session()->flash('flash.bannerStyle', 'success');
+
+        return redirect()->route('contacts.edit', $contact);
     }
 
     /**
@@ -86,6 +109,11 @@ class ContactController extends Controller
      */
     public function destroy(Contact $contact)
     {
-        //
+        $contact->delete();
+
+        session()->flash('flash.banner', 'El contacto se eliminó correctamente');
+        session()->flash('flash.bannerStyle', 'success');
+
+        return redirect()->route('contacts.index');
     }
 }
