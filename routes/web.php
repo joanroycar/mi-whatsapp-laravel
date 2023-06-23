@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ContactController;
+use App\Http\Livewire\ChatComponent;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -32,3 +33,4 @@ Route::get('/', function () {
 
 // Route::middleware('auth')->resource('contacts', ContactController::class)->names('contacts');
 Route::resource('contacts', ContactController::class)->middleware('auth');
+Route::get('/chat', ChatComponent::class)->middleware('auth')->name('chat.index');

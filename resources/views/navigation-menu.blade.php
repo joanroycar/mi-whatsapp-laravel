@@ -15,6 +15,10 @@
                     <x-nav-link href="{{ route('contacts.index') }}" :active="request()->routeIs('contacts.*')">
                         Contactos
                     </x-nav-link>
+
+                    <x-nav-link href="{{ route('chat.index') }}" :active="request()->routeIs('chat.*')">
+                        Chat
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -142,6 +146,14 @@
             <x-responsive-nav-link href="{{ route('contacts.index') }}" :active="request()->routeIs('contacts.*')">
                 Contactos
             </x-responsive-nav-link>
+
+
+            <x-responsive-nav-link href="{{ route('chat.index') }}" :active="request()->routeIs('chat.*')">
+                Chat
+            </x-responsive-nav-link>
+
+
+
         </div>
 
         <!-- Responsive Settings Options -->
