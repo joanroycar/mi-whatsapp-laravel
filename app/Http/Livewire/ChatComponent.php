@@ -4,6 +4,9 @@ namespace App\Http\Livewire;
 
 use App\Models\Chat;
 use App\Models\Contact;
+use App\Models\Message;
+use App\Notifications\NewMessage;
+use Illuminate\Support\Facades\Notification;
 use Livewire\Component;
 
 class ChatComponent extends Component
@@ -13,6 +16,16 @@ class ChatComponent extends Component
     public $contactChat, $chat;
 
     public $bodyMessage;
+
+    public function getListeners()
+    {
+        $user_id = auth()->user()->id;
+
+        return [
+            "echo-notification:App.Models.User.{$user_id},notification" => 'render',
+        ];
+    }
+
 
     public function getContactsProperty()
     {
@@ -30,6 +43,28 @@ class ChatComponent extends Component
             })
             ->get() ?? [];
     }
+
+    public function getMessagesProperty()
+    {
+
+        return $this->chat ? $this->chat->messages()->get() : [];
+        // return $this->chat ? Message::where('chat_id', $this->chat->id)->get() : [];
+
+    }
+
+    public function getChatsProperty()
+    {
+
+        return auth()->user()->chats()->get()->sortByDesc('last_message_at');
+    }
+
+
+    public function getUsersNotificationsProperty()
+    {
+        return $this->chat ?  $this->chat->users->where('id', '!=', auth()->id()) : [];
+    }
+
+
 
     public function sendMessage()
     {
@@ -50,11 +85,14 @@ class ChatComponent extends Component
                 ]
             );
         }
-        
+
         $this->chat->messages()->create([
             'body' => $this->bodyMessage,
             'user_id' => auth()->user()->id
         ]);
+
+        Notification::send($this->users_notifications, new NewMessage($this->chat));
+
         $this->reset('contactChat', 'bodyMessage');
     }
 
@@ -71,13 +109,27 @@ class ChatComponent extends Component
         if ($chat) {
 
             $this->chat = $chat;
+            $this->reset('contactChat', 'bodyMessage', 'search');
         } else {
             $this->contactChat = $contact;
+            $this->reset('chat', 'bodyMessage', 'search');
         }
     }
+    public function open_chat(Chat $chat)
+    {
 
+        $this->chat = $chat;
+        $this->reset('contactChat', 'bodyMessage');
+    }
     public function render()
     {
+
+        if($this->chat){
+
+            $this->emit('scrollIntoView');
+
+
+        }
         return view('livewire.chat-component')->layout('layouts.chat');
     }
 }
